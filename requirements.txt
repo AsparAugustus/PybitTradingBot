@@ -1,0 +1,6 @@
+flask
+gunicorn
+pybit
+
+requests>=2.22.0
+websocket-client>=0.57.0
