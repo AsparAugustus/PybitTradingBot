@@ -1,0 +1,44 @@
+//@version=5
+strategy("Webhook test bot", overlay=true, default_qty_type = strategy.cash,  default_qty_value=1000)
+
+
+
+
+limit_order_pct = input.float(title="Limit order % away from low", defval=0.995)
+limit_order_price = close * limit_order_pct
+
+stopprice_pct = input.float(title="Stop order % away from order", defval=0.99)
+stopprice_price = limit_order_price * stopprice_pct
+
+take_profit_pct = input.float(title="Take profit % away from low", defval=1.005)
+take_profit_price = limit_order_price * take_profit_pct
+
+
+
+price_change = ((close - close[1])/close[1]) * 100
+
+
+plot(price_change)
+
+plot(limit_order_price, title='limit_order_price', color=color.blue, display=display.none)
+plot(stopprice_price, title='stopprice_price', color=color.blue, display=display.none)
+plot(take_profit_price, title='take_profit_price', color=color.blue, display=display.none)
+
+
+condition1 = (price_change >= 0.02)
+condition2 = (time - time[1] <= 60)
+
+
+template = '{{plot_1}}, {{plot_2}}, {{plot_3}}'
+
+
+
+
+if(condition1)
+    strategy.entry(id="long" , direction=strategy.long, comment="Long", alert_message=template)
+    strategy.exit("exit", "long", stop=stopprice_price, limit=take_profit_price, comment_profit="Take profit", comment_loss = "Stopped out :(")
+    
+
+
+
+

@@ -1,0 +1,90 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © Lysergication
+
+//@version=5
+strategy("Past 80 bars Lowest Low 15 mins scalp", overlay=true, default_qty_type = strategy.cash,  default_qty_value=1000)
+
+
+
+
+lookback = input.int(title="Lookback Period", defval=80, minval=1)
+
+var initialCapital = strategy.equity
+
+fifteen_min_chart = request.security(syminfo.tickerid, "15", close)
+lowestlow = ta.lowest(fifteen_min_chart, lookback)
+
+plot(lowestlow, color=color.green)
+
+openCondition1 = (low <= lowestlow and strategy.position_size == 0)
+
+limit_order_pct = input.float(title="Limit order % away from low", defval=0.99)
+limit_order_price = close * limit_order_pct
+
+stopprice_pct = input.float(title="Stop order % away from order", defval=0.97)
+stopprice_price = limit_order_price * stopprice_pct
+
+take_profit_pct = input.float(title="Take profit % away from low", defval=1.03)
+take_profit_price = limit_order_price * take_profit_pct
+
+RSIwatch = input.float(title="30 mins RSI trigger", defval=35, minval=0)
+
+RSIlookback = input.int(title="how many RSI bars lookback", defval=5)
+
+thirtyminutes_chart = request.security(syminfo.tickerid, "15", close)
+RSIvalues = ta.rsi(thirtyminutes_chart, 14)
+
+RSI_below_condition = RSIvalues < RSIwatch
+RSI_xbars_condition = RSIlookback >= ta.barssince(RSI_below_condition)
+
+
+LastxRSIvalues = ta.lowest(RSIvalues, RSIlookback)
+RSIarray = array.new_float(RSIlookback, LastxRSIvalues)
+avg_rsi = array.avg(RSIarray)
+
+RSI_change = ta.change(avg_rsi)
+
+
+
+plot_color = RSI_change > 0 and RSI_xbars_condition ? color.green : color.red
+plot(RSIvalues, title="RSI values", linewidth=2, color=plot_color)
+
+
+
+
+var trade_loss = 0
+var trade_won = 0
+
+var index_bar_record = 0
+var cooldown = 25 // Here I want to pause for 8 bars
+
+
+if strategy.losstrades > trade_loss // A new LOSS
+    trade_loss := strategy.losstrades
+    index_bar_record := bar_index // I record the position (in bars) of my loss
+        
+if strategy.wintrades > trade_won // A new WIN
+    trade_won := strategy.wintrades
+    index_bar_record := 0
+
+// I can now delay my strategy below if I get a loss before
+cooldown_condition =  bar_index > index_bar_record + cooldown
+
+
+
+RSICondition = RSI_change > 0
+// RSICondition2 = ta.rsi()
+
+if(openCondition1 and RSICondition and RSI_xbars_condition and cooldown_condition)
+    label.new(bar_index, RSIvalues, "Up", style=label.style_none)
+    
+
+
+
+
+if(openCondition1 and RSICondition and RSI_xbars_condition and cooldown_condition) 
+    strategy.entry(id="long" , direction=strategy.long, limit=limit_order_price, stop=stopprice_price, comment="Long")
+
+    strategy.exit("exit", "long", stop=stopprice_price, limit=take_profit_price, comment_profit="Take profit", comment_loss = "Stopped out :(")
+
+

@@ -3,14 +3,19 @@ import pp
 import time
 import config
 
+
+
 client = HTTP(endpoint="https://api-testnet.bybit.com", api_key=config.TESTNET_BYBIT_API_KEY, api_secret=config.TESTNET_BYBIT_API_SECRET)
-print('loggedin')
+print('Logged in')
+
+
+
 
 def cancel_all_orders():
     client.cancel_all_active_orders(symbol="ETHUSDT")
 
 
-def any_positions():
+def any_open_positions():
 
     my_positions = client.my_position(symbol='ETHUSDT')
 
@@ -35,11 +40,17 @@ def place_order(qty, price, tp, sl):
     stop_loss=sl
 ))
 
+def get_wallet_usdt_balance():
+    wallet_balance = client.get_wallet_balance()
+    usdt_balance = wallet_balance['result']['USDT']['wallet_balance']
+
+    return usdt_balance
 
 
 
 
-wallet_balance = client.get_wallet_balance()
+
+print(get_wallet_usdt_balance())
 
 # pp(wallet_balance['result']['USDT']['available_balance'])
 
@@ -54,6 +65,8 @@ wallet_balance = client.get_wallet_balance()
 # #     print('hello')
 
 # pp(active_order['result']['data'])
+
+
 
 
 

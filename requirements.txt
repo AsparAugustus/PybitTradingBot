@@ -2,5 +2,13 @@ flask
 gunicorn
 pybit
 
+seaborn
+matplotlib
+datetime
+python-tk
+numpy
+
+
 requests>=2.22.0
 websocket-client>=0.57.0
+
