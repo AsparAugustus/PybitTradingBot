@@ -25,13 +25,13 @@ def webhook():
         }
     
 
-    price = round(data['strategy']['order_price'], 2)
-
-    qty = data['strategy']['market_position_size']
+    # price = round(data['strategy']['order_price'], 2)
 
 
-    sl = round(data['strategy']['order_price'] * 0.99, 2)
-    tp = round(data['strategy']['order_price'] * 1.01, 2)
+
+
+    # sl = round(data['strategy']['order_price'] * 0.99, 2)
+    # tp = round(data['strategy']['order_price'] * 1.01, 2)
 
 
 
@@ -49,7 +49,7 @@ def webhook():
 
             numbers = [round(float(num), 2) for num in number_strings]
 
-
+            qty = data['strategy']['market_position_size']
             price = numbers[0]
             sl = numbers[1]
             tp = numbers[2]
